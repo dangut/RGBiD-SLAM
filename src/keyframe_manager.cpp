@@ -68,9 +68,9 @@ RGBID_SLAM::KeyframeManager::KeyframeManager(int Nbins):Nbins_(Nbins)
   max_counter_nofound_ = -1;
   max_cluster_unupdated_time_ = 5;
   
-  bool trajectory_has_changed_= false;
-  bool pose_graph_has_changed_= false;
-  bool new_keyframe_has_changed_= false;
+  trajectory_has_changed_= false;
+  pose_graph_has_changed_= false;
+  new_keyframe_has_changed_= false;
 }
 
 RGBID_SLAM::KeyframeManager::~KeyframeManager()
