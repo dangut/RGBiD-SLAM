@@ -253,6 +253,8 @@ RGBID_SLAM::KeyframeManager::operator() ()
 void 
 RGBID_SLAM::KeyframeManager::performOptimisation()
 {
+  if (poses_.empty()) return;
+
   std::cout << "Building graph..." << std::endl
                                      << std::endl;
   //The loop has ended, now we optimise with all the constraints  
