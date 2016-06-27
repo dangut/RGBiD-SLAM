@@ -156,9 +156,9 @@ RGBID_SLAM::PoseGraph::buildGraph(const std::vector<Pose> &poses, const std::vec
     optimizer_.addEdge(eSE3);    
   }
   
-  if (fix_last_flag_)
+  if (fix_last_flag_ && max_kf_id > 0)
     optimizer_.vertex(max_kf_id)->setFixed(true);
-  else
+  else if(!fix_last_flag_ && min_kf_lc_id < std::numeric_limits<int>::max())
     optimizer_.vertex(min_kf_lc_id)->setFixed(true);
   
   rotation_last_b4optim_ = poses.back().rotation_;
