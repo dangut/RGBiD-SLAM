@@ -1,0 +1,19 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+ADD_SUBDIRECTORY(stuff)
+ADD_SUBDIRECTORY(core)
+
+# Pre-canned types
+ADD_SUBDIRECTORY(types)
+
+# Solvers
+ADD_SUBDIRECTORY(solvers)
+
+IF(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/playground")
+  # Playground
+  OPTION (G2O_BUILD_PLAYGROUND "Build g2o playground" ON)
+  IF (G2O_BUILD_PLAYGROUND)
+    MESSAGE(STATUS "building playground")
+    ADD_SUBDIRECTORY(playground)
+  ENDIF()
+ENDIF()

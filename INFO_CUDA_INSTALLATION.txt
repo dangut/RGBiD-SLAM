@@ -1,0 +1,63 @@
+---------Cuda toolkit and nvidia drivers installation------------
+
+1) If using a laptop, install bumblebee  (http://www.themukt.com/2014/06/13/howto-install-nvidia-331-bumblebee-optimus-cards-ubuntu/)
+
+ 	a) First and foremost, install the kernel header file. This header file will be required to recompile dkms package for the new Nvidia driver.
+
+		$ sudo apt-get install linux-headers-generic
+
+	b) Install bumblebee if you haven’t done already
+
+		$ sudo add-apt-repository ppa:bumblebee/stable (This step might not ve neccesary in the newest versions of Ubuntu, since they seem to be avalable in the official repositories)
+		Then
+			$ sudo apt-get update && sudo apt-get install bumblebee bumblebee-nvidia primus
+		or 
+			open synaptic PM, reload repos and install packages
+
+2) Install the last cuda toolkit (at the moment of writting this, cuda 7.5) (http://docs.nvidia.com/cuda/cuda-getting-started-guide-for-linux/#axzz39Xa49azk)
+		$ sudo dpkg -i cuda-repo-<distro>_<version>_<architecture>.deb
+		Then
+			$ sudo apt-get update
+			$ sudo apt-get install cuda
+		or
+			open synaptic PM, reload repos and install packages
+
+	NOTE: when installing CUDA, PM will probably tell to remove nvidia-current and nvidia-some_number packages which were installed together with bumblebee package. It's OK removing them since cuda package includes updated drivers.
+
+3) Environment setup and isntall samples
+	$ export PATH=/usr/local/cuda-7.5/bin:$PATH
+	$ export LD_LIBRARY_PATH=/usr/local/cuda-7.5/lib:$LD_LIBRARY_PATH
+	$ cuda-install-samples-7.5.sh <dir>
+
+4) Once installation is done, edit the bumblebee.conf using your favourite text editor. Check which driver version (version_number) was installed with cuda toolkit (nvidia-352 for cuda 7.5).
+
+	Open bumblebee config file
+	  $ sudo vim /etc/bumblebee/bumblebee.conf
+
+	In line no 22, set the following:
+	  Driver=nvidia
+
+	You will also need to specify which nvidia driver to use in line no 55:
+	  KernelDriver=nvidia-version_number
+
+	Change the following in line no 58:
+	  LibraryPath=/usr/lib/nvidia-version_number:/usr/lib32/nvidia-version_number
+
+	And in line no 61 :
+	  XorgModulePath=/usr/lib/nvidia-version_number/xorg,/usr/lib/xorg/modules
+
+	Reinstall bbswitch-dkms
+	 $sudo apt-get install --reinstall bbswitch-dkms
+
+	Reboot
+
+Edit the file /etc/modprobe.d/bumblebee.conf or create a new file if you are not using bumblebee and add a line to it:
+
+alias nvidia-uvm nvidia-version_number-uvm
+
+
+
+
+
+
+

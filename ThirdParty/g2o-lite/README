@@ -1,0 +1,8 @@
+This is a reduced version of g2o, distributed together with RGBiD-SLAM.
+This version is completely BSD. Source files of 1) libraries licensed under GPL or LGPL and 2) apps, examples and binaries, have been removed.
+To build you will need the packages cmake and eigen3. RGBiD-SLAM uses the Eigen Sparse module for least squares minimisation.
+This module is stable from version 3.1. If the package version  in Ubuntu repositories is older you can download a newer one from:
+
+packages.yade-dem.org/precise/libeigen3-dev_3.2.1-1~precise1_all.deb
+
+For a complete version of g2o go to: https://github.com/RainerKuemmerle/g2o
