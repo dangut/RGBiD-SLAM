@@ -23,7 +23,7 @@ include_directories(${catkin_INCLUDE_DIRS})
  
  
 #set(CMAKE_PREFIX_PATH "/usr/local/")
-find_package(PCL 1.7.2 EXACT REQUIRED COMPONENTS common io visualization filters)
+find_package(PCL 1.7  REQUIRED COMPONENTS common io visualization filters)
 message(${PCL_FOUND})
 include_directories(BEFORE ${PCL_INCLUDE_DIRS})
 link_directories( ${PCL_LIBRARY_DIRS})
