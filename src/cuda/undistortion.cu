@@ -120,8 +120,8 @@ namespace RGBID_SLAM
       float u2v = u*u*v;
       float uv2 = u*v*v;
       
-      D0 = dp.q01*r2 + dp.q02*r4 + dp.q03*r6 + dp.q04*u + dp.q05*v + dp.q06*uv + dp.q07*u2v + dp.q08*uv2;
-      D1 = dp.q11*r2 + dp.q12*r4 + dp.q13*r6 + dp.q14*u + dp.q15*v + dp.q16*uv + dp.q17*u2v + dp.q18*uv2;
+      D0 = dp.q00 + dp.q01*r2 + dp.q02*r4 + dp.q03*r6 + dp.q04*u + dp.q05*v + dp.q06*uv + dp.q07*u2v + dp.q08*uv2;
+      D1 = dp.q10 + dp.q11*r2 + dp.q12*r4 + dp.q13*r6 + dp.q14*u + dp.q15*v + dp.q16*uv + dp.q17*u2v + dp.q18*uv2;
       
       return;
     }
