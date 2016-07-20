@@ -24,11 +24,9 @@ Setup of NVIDIA GPUs and enabling of CUDA in Ubuntu systems is not trivial (spec
 
 Install the following packages through synaptic software manager
 
-ros-indigo-desktop
+ros-indigo-desktop (or ros-hydro-desktop)
 
-ros-indigo-openni2-launch
-
-libsuitesparse-dev 
+ros-indigo-openni2-launch  (ros-hydro-openni2-launch)
 
 pcl-1.7-all-dev
 
@@ -125,7 +123,7 @@ pattern and the camera can be rigidly fixed before taking one capture.
 
 Note that in order to calibrate the depth(IR) camera as well as the stereo transofrmation btw. RGB and depth(IR) cameras you have to set "depth_registration:=false" in the "roslaunch" command.
    
- ###Disclaimer
+###Disclaimer
  
  There is the option of disabling registration also when running the SLAM app an use a customised calibration 
  for the complete RGB-D sensor (RGB intrinsics, IR intrinsics, RGB-IR stereo, depth distortion). 
