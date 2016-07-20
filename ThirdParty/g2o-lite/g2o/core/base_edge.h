@@ -66,7 +66,7 @@ namespace g2o {
       //! information matrix of the constraint
       const InformationType& information() const { return _information;}
       InformationType& information() { return _information;}
-      void setInformation(const InformationType& information) { _information = information;}
+      virtual void setInformation(const InformationType& information) { _information = information;}
 
       virtual const double* informationData() const { return _information.data();}
       virtual double* informationData() { return _information.data();}
@@ -133,7 +133,7 @@ namespace g2o {
       //! information matrix of the constraint
       const InformationType& information() const { return _information;}
       InformationType& information() { return _information;}
-      void setInformation(const InformationType& information) { _information = information;}
+      virtual void setInformation(const InformationType& information) { _information = information;}
 
       virtual const double* informationData() const { return _information.data();}
       virtual double* informationData() { return _information.data();}

@@ -79,7 +79,7 @@ bool EdgeSO3R3::read(std::istream& is)  {
     for (int j=i; j<6; j++) {
       is >> information()(i,j);
       if (i!=j)
-        information()(j,i)=information()(i,j);
+        _proto_information(j,i)=_proto_information(i,j);
     }
   return true;
 }
@@ -90,7 +90,7 @@ bool EdgeSO3R3::write(std::ostream& os) const {
     os << iTj[i] << " ";
   for (int i=0; i<6; i++)
     for (int j=i; j<6; j++){
-      os << " " <<  information()(i,j);
+      os << " " <<  _proto_information(i,j);
     }
   return os.good();
 }

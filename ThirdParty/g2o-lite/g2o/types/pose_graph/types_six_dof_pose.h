@@ -80,6 +80,7 @@ class G2O_TYPES_POSEGRAPH_API EdgeSO3R3 : public BaseBinaryEdge<6, TrafoSO3R3, V
 
     bool write(std::ostream& os) const;
 
+    //e+de = Log(exp(dx_ij)*iTj*(wTj*exp(dx_j))^-1*wTi*exp(dx_i))
     void computeError()  {
       const VertexSO3R3* vi = static_cast<const VertexSO3R3*>(_vertices[0]);
       const VertexSO3R3* vj = static_cast<const VertexSO3R3*>(_vertices[1]);
@@ -87,9 +88,27 @@ class G2O_TYPES_POSEGRAPH_API EdgeSO3R3 : public BaseBinaryEdge<6, TrafoSO3R3, V
       TrafoSO3R3 iTj_measured(_measurement);
       TrafoSO3R3 errorT_= iTj_measured*vj->estimate().inverse()*vi->estimate();
       _error = errorT_.log();
+      Eigen::Vector3d error_rot = _error.tail(3);
+      Eigen::Matrix3d Q = jacobianR(error_rot);
+      Eigen::Matrix3d Qinv = Q.inverse();
+      
+      Eigen::Matrix<double, 6, 6> de_by_diTj;
+      de_by_diTj.setZero();
+      
+      de_by_diTj.block(0,0,3,3) = Eigen::Matrix3d::Identity();
+      de_by_diTj.block(0,3,3,3) = -skew(errorT_.translation());
+      de_by_diTj.block(3,3,3,3) = Qinv*errorT_.rotation().transpose();
+      
+      Eigen::Matrix<double, 6, 6> covariance = de_by_diTj*_proto_information.inverse()*de_by_diTj.transpose();
+      _information = covariance.inverse();    
     }
 
     virtual void linearizeOplus();
+    
+    virtual void setInformation(const Eigen::Matrix<double,6,6>& proto_information) {  _proto_information =  proto_information;}
+    
+    Eigen::Matrix<double,6,6> _proto_information; 
+   
 };
 
 
