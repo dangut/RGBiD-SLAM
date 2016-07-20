@@ -266,40 +266,23 @@ void RGBID_SLAM::VisodoTracker::loadCalibration(std::string const &calib_file)
       std::cout << "  c1: " << c1_ << " " << std::endl;    
     }
     
-    if (calibration.getEntry("alpha0",entry))
+    if (calibration.getEntry("q0",entry))
     {
-      std::stringstream alpha0_ss(entry.getValue());
+      std::stringstream q0_ss(entry.getValue());
       
-      alpha0_ss >> alpha0_ ;
+      q0_ss >> q00_ >> q01_ >> q02_ >> q03_ >> q04_ >> q05_ >> q06_ >> q07_ >> q08_ ;
       
-      std::cout << "  alpha0: " << alpha0_ << " " << std::endl;    
+      std::cout << "  DEPTH DIST COEFS: " << q00_ << " " << q01_ << " " << q02_ << " " << q03_ << " " << q04_ << " " << q05_ << " " << q06_ << " " << q07_ << " " << q08_ << " " << std::endl;    
     }
     
-    if (calibration.getEntry("alpha1",entry))
-    {
-      std::stringstream alpha1_ss(entry.getValue());
-      
-      alpha1_ss >> alpha1_ ;
-      
-      std::cout << "  alpha1: " << alpha1_ << " " << std::endl;    
-    }
     
-    if (calibration.getEntry("alpha2",entry))
+    if (calibration.getEntry("q1",entry))
     {
-      std::stringstream alpha2_ss(entry.getValue());
+      std::stringstream q1_ss(entry.getValue());
       
-      alpha2_ss >> alpha2_ ;
+      q1_ss >> q10_ >> q11_ >> q12_ >> q13_ >> q14_ >> q15_ >> q16_ >> q17_ >> q18_ ;
       
-      std::cout << "  alpha2: " << alpha2_ << " " << std::endl;    
-    }
-    
-    if (calibration.getEntry("spdist",entry))
-    {
-      std::stringstream kspd_ss(entry.getValue());
-      
-      kspd_ss >> kspd1_ >> kspd2_ >> kspd3_ >> kspd4_ >> kspd5_ >> kspd6_ >> kspd7_ >> kspd8_ ;
-      
-      std::cout << "  DEPTH DIST COEFS: " << kspd1_ << " " << kspd2_ << " " << kspd3_ << " " << kspd4_ << " " << kspd5_ << " " << kspd6_ << " " << kspd7_ << " " << kspd8_ << " " << std::endl;    
+      std::cout << "  DEPTH DIST COEFS: " << q10_ << " " << q11_ << " " << q12_ << " " << q13_ << " " << q14_ << " " << q15_ << " " << q16_ << " " << q17_ << " " << q18_ << " " << std::endl;    
     }
         
     //TODO: setDepthIntrinsics (fx_, fy_, cx_, cy_);    
@@ -479,9 +462,9 @@ RGBID_SLAM::VisodoTracker::setRGBIntrinsics (float fx, float fy, float cx, float
 
 void
 RGBID_SLAM::VisodoTracker::setDepthIntrinsics (float fxd, float fyd, float cxd, float cyd, float k1d, float k2d, float k3d, float k4d, float k5d,
-                                                float c0, float c1, float alpha0, float alpha1, float alpha2, 
-                                                float kspd1, float kspd2, float kspd3, float kspd4, 
-                                                float kspd5, float kspd6, float kspd7, float kspd8)
+                                                float c0, float c1, 
+                                                float q00, float q01, float q02, float q03, float q04, float q05, float q06, float q07, float q08,
+                                                float q10, float q11, float q12, float q13, float q14, float q15, float q16, float q17, float q18 )
 {
   fxd_ = fxd;
   fyd_ = fyd;
@@ -496,18 +479,26 @@ RGBID_SLAM::VisodoTracker::setDepthIntrinsics (float fxd, float fyd, float cxd, 
   
   c0_ = c0;
   c1_ = c1;
-  alpha0_ = alpha0;
-  alpha1_ = alpha1;
-  alpha2_ = alpha2;
   
-  kspd1_ = kspd1;
-  kspd2_ = kspd2;
-  kspd3_ = kspd3;
-  kspd4_ = kspd4;
-  kspd5_ = kspd5;
-  kspd6_ = kspd6;
-  kspd7_ = kspd7;
-  kspd8_ = kspd8;
+  q00_ = q00;
+  q01_ = q01;
+  q02_ = q02;
+  q03_ = q03;
+  q04_ = q04;
+  q05_ = q05;
+  q06_ = q06;
+  q07_ = q07;
+  q08_ = q08;
+  
+  q10_ = q10;
+  q11_ = q11;
+  q12_ = q12;
+  q13_ = q13;
+  q14_ = q14;
+  q15_ = q15;
+  q16_ = q16;
+  q17_ = q17;
+  q18_ = q18;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1982,7 +1973,8 @@ RGBID_SLAM::VisodoTracker::trackNewFrame()
     kf_time_accum_ += delta_t_;
     Intr intr (fx_, fy_, cx_, cy_, k1_, k2_, k3_, k4_, k5_);
     Intr intr_depth (fxd_, fyd_, cxd_, cyd_, k1d_, k2d_, k3d_, k4d_, k5d_);
-    DepthDist depth_dist (c1_, c0_, alpha0_, alpha1_, alpha2_, kspd1_, kspd2_, kspd3_, kspd4_, kspd5_, kspd6_, kspd7_, kspd8_);
+    DepthDist depth_dist (c1_, c0_, q00_, q01_, q02_, q03_, q04_, q05_, q06_, q07_, q08_, 
+                          q10_, q11_, q12_, q13_, q14_, q15_, q16_, q17_, q18_);
 
     pcl::ScopeTime t1 ("whole loop");
     {

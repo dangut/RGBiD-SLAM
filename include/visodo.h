@@ -86,9 +86,11 @@ namespace RGBID_SLAM
                                   
         void setDepthIntrinsics (float fxd, float fyd, float cxd = -1, float cyd = -1, 
                                   float k1d = 0.f, float k2d = 0.f, float k3d = 0.f, float k4d = 0.f, float k5d = 0.f,
-                                  float c0 = 0.f, float c1 = 1.f, float alpha0 = 1.f, float alpha1 = 0.f, float alpha2 = 0.f, 
-                                  float kspd1 = 0.f, float kspd2 = 0.f, float kspd3 = 0.f, float kspd4 = 0.f, 
-                                  float kspd5 = 0.f, float kspd6 = 0.f, float kspd7 = 0.f, float kspd8 = 0.f);
+                                  float c0 = 0.f, float c1 = 1.f, 
+                                  float q00 = 0.f, float q01 = 0.f, float q02 = 0.f, float q03 = 0.f, float q04 = 0.f, 
+                                  float q05 = 0.f, float q06 = 0.f, float q07 = 0.f, float q08 = 0.f,
+                                  float q10 = 1.f, float q11 = 0.f, float q12 = 0.f, float q13 = 0.f, float q14 = 0.f, 
+                                  float q15 = 0.f, float q16 = 0.f, float q17 = 0.f, float q18 = 0.f );
                                 
         void setSharedCameraPose (const Eigen::Affine3d& pose);       
 
@@ -208,7 +210,10 @@ namespace RGBID_SLAM
         float fxd_, fyd_, cxd_, cyd_, k1d_, k2d_, k3d_, k4d_, k5d_;
         int custom_registration_;
         
-        float c1_, c0_, alpha0_, alpha1_, alpha2_, kspd1_, kspd2_, kspd3_, kspd4_, kspd5_, kspd6_, kspd7_, kspd8_;
+        float c1_, c0_;
+        float q00_, q01_, q02_, q03_, q04_, q05_, q06_, q07_, q08_; 
+        float q10_, q11_, q12_, q13_, q14_, q15_, q16_, q17_, q18_;
+        
         int x_shift_;
         int y_shift_;
         

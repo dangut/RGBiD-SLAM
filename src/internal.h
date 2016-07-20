@@ -141,15 +141,21 @@ namespace RGBID_SLAM
     
     struct DepthDist
     {
-      float c1, c0, alpha0, alpha1, alpha2, kd1, kd2, kd3, kd4, kd5, kd6, kd7, kd8;
+      float c1, c0;
+      float q00, q01, q02, q03, q04, q05, q06, q07, q08;
+      
+      float q10, q11, q12, q13, q14, q15, q16, q17, q18;
       int xshift, yshift;
       DepthDist () {}
-      DepthDist (float c1_, float c0_, float alpha0_ = 1.f, float alpha1_=0.f , float alpha2_ = 0.f,
-                  float kd1_=0.f, float kd2_=0.f, float kd3_=0.f, float kd4_=0.f, 
-                  float kd5_=0.f, float kd6_=0.f, float kd7_=0.f, float kd8_=0.f,
-                  int xshift_ = 4, int yshift_ = 4) : 
-                  c1(c1_), c0(c0_), alpha0(alpha0_), alpha1(alpha1_), alpha2(alpha2_),
-                  kd1(kd1_), kd2(kd2_), kd3(kd3_), kd4(kd4_), kd5(kd5_), kd6(kd6_), kd7(kd7_), kd8(kd8_), 
+      DepthDist (float c1_, float c0_, 
+                  float q00_ = 0.f, float q01_ = 0.f, float q02_ = 0.f, float q03_ = 0.f, float q04_ = 0.f, 
+                  float q05_ = 0.f, float q06_ = 0.f, float q07_ = 0.f, float q08_ = 0.f,
+                  float q10_ = 1.f, float q11_ = 0.f, float q12_ = 0.f, float q13_ = 0.f, float q14_ = 0.f, 
+                  float q15_ = 0.f, float q16_ = 0.f, float q17_ = 0.f, float q18_ = 0.f,
+                  int xshift_ = 4, int yshift_ = 4) :                   
+                  c1(c1_), c0(c0_), 
+                  q00(q00_), q01(q01_), q02(q02_), q03(q03_), q04(q04_), q05(q05_), q06(q06_), q07(q07_), q08(q08_), 
+                  q10(q10_), q11(q11_), q12(q12_), q13(q13_), q14(q14_), q15(q15_), q16(q16_), q17(q17_), q18(q18_), 
                   xshift(xshift_), yshift(yshift_) {}
                   
     };

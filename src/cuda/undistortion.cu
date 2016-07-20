@@ -110,8 +110,8 @@ namespace RGBID_SLAM
       return;  
     }
     
-    __device__ __forceinline__ float
-    undistortDepthinvOffset(float u, float v, const DepthDist& dp)
+    __device__ __forceinline__ void
+    undistortDepthinv(float& D0, float& D1, float u, float v, const DepthDist& dp)
     {
       float r2 = u*u+v*v;
       float r4 = r2*r2;
@@ -120,21 +120,22 @@ namespace RGBID_SLAM
       float u2v = u*u*v;
       float uv2 = u*v*v;
       
-      float spatial_offset = dp.kd1*r2 + dp.kd2*r4 + dp.kd3*r6 + dp.kd4*u + dp.kd5*v + dp.kd6*uv + dp.kd7*u2v + dp.kd8*uv2;
+      D0 = dp.q01*r2 + dp.q02*r4 + dp.q03*r6 + dp.q04*u + dp.q05*v + dp.q06*uv + dp.q07*u2v + dp.q08*uv2;
+      D1 = dp.q11*r2 + dp.q12*r4 + dp.q13*r6 + dp.q14*u + dp.q15*v + dp.q16*uv + dp.q17*u2v + dp.q18*uv2;
       
-      return spatial_offset;
+      return;
     }
     
     __device__ __forceinline__ float
-    correctDepthinv(float u, float v, float wd, const DepthDist& dp)
+    correctDepthinv(float u, float v, float wm, const DepthDist& dp)
     {
-      float spatial_offset = undistortDepthinvOffset(u, v, dp);
+      float wd = dp.c1*wm + dp.c0;
       
-      float wu = wd + spatial_offset*(dp.alpha0 + dp.alpha1*wd + dp.alpha2*wd*wd);
-      wu *= dp.c1;
-      wu += dp.c0; 
+      float D1,D0;
       
-      return wu;
+      undistortDepthinv(D1, D0, u, v, dp);
+      
+      return D1*wd + D0;   
     }
     
     
