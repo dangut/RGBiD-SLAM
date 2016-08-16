@@ -353,10 +353,11 @@ RGBID_SLAM::KeyframeManager::processNewKeyframe()
         int image_id = cloud2image_indices_[point_id];
         int x = image_id % cols;
         int y = image_id / cols;
-        //TODO: change visualizer of negentropy image
         negentropy_image_.ptr<float>(y)[x] =  negentropy;        
       }
     }
+    
+    negentropy_image_.copyTo(keyframe_new_->negentropy_image_);
   } 
   ////////////////////////////
   
@@ -375,6 +376,8 @@ RGBID_SLAM::KeyframeManager::processNewKeyframe()
     
     assert(keyframe_new_->points2D_.size() == keyframe_new_->points3D_.size());
     
+    keyframe_new_->computeMaskedDescriptors();
+    std::cout << "masking bows " << std::endl;
     loop_closer_ptr_->computeBowHistograms(keyframe_new_); 
     
     description_times_.push_back(t3.getTime()); 
@@ -396,7 +399,8 @@ RGBID_SLAM::KeyframeManager::processNewKeyframe()
   //cv::Mat mask_RGB;
   //cv::cvtColor((keyframe_new_->overlap_mask_image_),mask_RGB,cv::COLOR_GRAY2BGR);
   //rgb_image_masked_ = cv::Scalar(0);
-  //rgb_image_with_keypoints_.copyTo(rgb_image_masked_,mask_RGB);
+  
+  
   
   {
     boost::mutex::scoped_lock lock(mutex_new_keyframe_);
@@ -412,8 +416,12 @@ RGBID_SLAM::KeyframeManager::processNewKeyframe()
     new_keyframe_pose_.linear() = keyframe_new_->getPose().rotation();
     new_keyframe_pose_.translation() = keyframe_new_->getPose().translation();
     new_kf_id_ = keyframe_new_->kf_id_;
+    rgb_image_masked_ = cv::Mat::zeros(rows, cols, CV_8UC3);
+    rgb_image_with_keypoints_.copyTo(rgb_image_masked_,keyframe_new_->mask_neg_list_[3]);
     new_keyframe_has_changed_ = true;
   }
+  
+  
   
   //updateVisualizerKeyframe(keyframe_new_->pose_, keyframe_new_->kf_id_, point_cloud_);
   

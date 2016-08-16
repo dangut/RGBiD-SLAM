@@ -591,8 +591,10 @@ RGBID_SLAM::VisualizationManager::refresh()
     //segmentation_view_ = keyframe_manager_ptr_->rgb_image_with_keypoints_;
     memcpy ((PixelRGB*)&(segmentation_view_[0]), &(keyframe_manager_ptr_->rgb_image_with_keypoints_.data[0]), 
             keyframe_manager_ptr_->rgb_image_with_keypoints_.cols * keyframe_manager_ptr_->rgb_image_with_keypoints_.rows*sizeof(PixelRGB));
-    negentropy_view_ = keyframe_manager_ptr_->negentropy_view_;
-    
+    //negentropy_view_ = keyframe_manager_ptr_->negentropy_view_;
+    memcpy ((PixelRGB*)&(negentropy_view_[0]), &(keyframe_manager_ptr_->rgb_image_masked_.data[0]), 
+            keyframe_manager_ptr_->rgb_image_masked_.cols * keyframe_manager_ptr_->rgb_image_masked_.rows*sizeof(PixelRGB));
+            
     keyframe_manager_ptr_->new_keyframe_has_changed_ = false;
     redraw_keyframe_ = true;
   }

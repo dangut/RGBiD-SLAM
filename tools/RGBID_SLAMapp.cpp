@@ -41,6 +41,7 @@
 
 #include <boost/filesystem.hpp>
 
+//#include "../include/io_utils.h"
 #include "../include/settings.h"
 #include "../include/visodo.h"
 #include "../include/keyframe_manager.h"
@@ -185,6 +186,8 @@ struct RGBID_SLAMApp
           num_failures = 0;
           (visodo_->depth_).upload (depth_.data, depth_.step, depth_.rows, depth_.cols);     
           (visodo_->rgb24_).upload (rgb24_.data, rgb24_.step, rgb24_.rows, rgb24_.cols);
+          std::cout << "Memory usage" << std::endl;
+	        RGBID_SLAM::device::showGPUMemoryUsage();
           (visodo_->new_frame_cond_).notify_one();  
                   
         }
@@ -387,6 +390,7 @@ main (int argc, char* argv[])
   std::string poses_logfile("poses");
   std::string misc_logfile("misc");
   std::string kf_times_logfile("kf_times");
+  std::string kf_data_binfile("kf_data");
   std::string pointcloud_file("pointclod");
   
   std::string config_file="";
@@ -417,6 +421,7 @@ main (int argc, char* argv[])
   	  misc_logfile = dataset_name + "_"  + misc_logfile;  
       kf_times_logfile = dataset_name + "_"  + kf_times_logfile;
       pointcloud_file = dataset_name + "_"  + pointcloud_file;
+      kf_data_binfile = dataset_name + "_"  + kf_data_binfile;
   }   
   /////////////////////////////////////////////////////////////////////
   
@@ -424,6 +429,7 @@ main (int argc, char* argv[])
   misc_logfile.append(".txt");
   kf_times_logfile.append(".txt");
   pointcloud_file.append(".ply");
+  kf_data_binfile.append(".bin");
   	
   std::cout << "init visodoApp" << std::endl;
   
@@ -494,6 +500,23 @@ main (int argc, char* argv[])
       app.evaluation_ptr_->saveAllPoses((app.keyframe_manager_)->poses_, *(app.visodo_),-1, poses_logfile2, misc_logfile); 
       app.evaluation_ptr_->saveTimeLogFiles(*(app.visodo_), *(app.keyframe_manager_) , kf_times_logfile);  
     }
+    
+    //Save keyframe data
+    // create and open a character archive for output
+    
+
+    // save kf data to archive
+    //{
+      //std::ofstream ofs(kf_data_binfile, std::ios::out | std::ios::binary);
+      //std::cout << "1"<< std::endl;
+      //boost::archive::binary_oarchive oa(ofs);
+      //std::cout << "2"<< std::endl;
+      //oa << app.keyframe_manager_->keyframes_list_;
+      //std::cout << app.keyframe_manager_->keyframes_list_.size() << std::endl;
+      //ofs.close();
+    //}
+    /////////////////////////////
+
     
     (app.visodo_).reset();
     

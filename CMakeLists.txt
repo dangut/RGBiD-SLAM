@@ -30,7 +30,7 @@ link_directories( ${PCL_LIBRARY_DIRS})
 add_definitions( ${PCL_DEFINITIONS})
 
 # Required boost modules
-set(BOOST_REQUIRED_MODULES system filesystem thread date_time iostreams math_c99)
+set(BOOST_REQUIRED_MODULES system filesystem thread date_time iostreams serialization math_c99)
 find_package(Boost 1.40.0 REQUIRED COMPONENTS ${BOOST_REQUIRED_MODULES})
 if(Boost_FOUND)
   set(BOOST_FOUND TRUE)

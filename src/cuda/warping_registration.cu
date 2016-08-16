@@ -900,6 +900,8 @@ namespace RGBID_SLAM
       cudaSafeCall ( cudaGetLastError () );
       
       output_dev.download(output_host);
+      gbuf.release();
+      output_dev.release();
       
       if (output_host[1] < 1.f)
         visibility_ratio = 0.f;

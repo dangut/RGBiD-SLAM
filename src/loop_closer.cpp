@@ -176,11 +176,16 @@ RGBID_SLAM::LoopCloser::loadVocabulary(std::string filename_vocabulary)
 void
 RGBID_SLAM::LoopCloser::computeBowHistograms(KeyframePtr& keyframe_query)
 {  
-  keyframe_query->bow_histogram_list_.resize(keyframe_query->bow_histogram_list_size_);
-  keyframe_query->bow_feature_vector_list_.resize(keyframe_query->bow_histogram_list_size_);
+  //keyframe_query->bow_histogram_list_.resize(keyframe_query->bow_histogram_list_size_);
+  //keyframe_query->bow_feature_vector_list_.resize(keyframe_query->bow_histogram_list_size_);
   
   //TODO: take many bow histograms after aplying image masks
-  vocabulary_->transform(keyframe_query->descriptors_,keyframe_query->bow_histogram_list_[0], keyframe_query->bow_feature_vector_list_[0],4);      
+  vocabulary_->transform(keyframe_query->descriptors_,keyframe_query->bow_histogram_list_[0], keyframe_query->bow_feature_vector_list_[0],4);   
+  
+  for (int i = 1; i < keyframe_query->bow_histogram_list_size_; i++)
+  {
+    vocabulary_->transform(keyframe_query->masked_descriptors_[i],keyframe_query->bow_histogram_list_[i], keyframe_query->bow_feature_vector_list_[i],4);  
+  }   
 }
 
 

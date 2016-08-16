@@ -43,9 +43,11 @@
 namespace RGBID_SLAM 
 {  
   struct Keyframe
-  {           
+  {        
+    Keyframe(){};
+       
     Keyframe(Eigen::Matrix3d K, double kd1, double kd2, double kd3, double kd4, double kd5,
-              Eigen::Matrix3d rotation, Eigen::Vector3d translation, Eigen::Matrix3d rotation_rel, Eigen::Vector3d translation_rel, int id, int cols = 640, int rows = 480, int bow_histogram_list_size= 1);
+              Eigen::Matrix3d rotation, Eigen::Vector3d translation, Eigen::Matrix3d rotation_rel, Eigen::Vector3d translation_rel, int id, int cols = 640, int rows = 480, int bow_histogram_list_size= 4);
     ~Keyframe();
     
     std::vector<PixelRGB> colors_;
@@ -73,6 +75,9 @@ namespace RGBID_SLAM
     cv::Mat normals_image_;
     cv::Mat overlap_mask_image_;
     
+    cv::Mat negentropy_image_;
+    std::vector<cv::Mat> mask_neg_list_;
+    
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr point_cloud_novel_;
     
     std::vector<Superjut> superjuts_list_;    
@@ -82,7 +87,9 @@ namespace RGBID_SLAM
     int bow_histogram_list_size_;
     
     std::vector<cv::KeyPoint> keypoints_; 
+    std::vector<std::vector<cv::KeyPoint> > masked_keypoints_; 
     std::vector<cv::Mat> descriptors_; //or simply cv::Mat??
+    std::vector<std::vector<cv::Mat> > masked_descriptors_; //or simply cv::Mat??
     std::vector<Eigen::Vector3d,Eigen::aligned_allocator<Eigen::Vector3d> > points3D_;
     std::vector<Eigen::Matrix3d,Eigen::aligned_allocator<Eigen::Matrix3d> > points3D_cov_;
     std::vector<Eigen::Vector2d,Eigen::aligned_allocator<Eigen::Vector2d> > points2D_;
@@ -95,7 +102,10 @@ namespace RGBID_SLAM
     
     void wrapDataInImages();
     
+    void computeMaskedDescriptors();
+    
     void freeUnneedMemory();
+    
     void lift2DKeypointsto3DPoints();      
     void lift2DKeypointsto3DPointsWithCovariance();
     

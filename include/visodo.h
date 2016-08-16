@@ -89,7 +89,7 @@ namespace RGBID_SLAM
                                   float c0 = 0.f, float c1 = 1.f, 
                                   float q00 = 0.f, float q01 = 0.f, float q02 = 0.f, float q03 = 0.f, float q04 = 0.f, 
                                   float q05 = 0.f, float q06 = 0.f, float q07 = 0.f, float q08 = 0.f,
-                                  float q10 = 1.f, float q11 = 0.f, float q12 = 0.f, float q13 = 0.f, float q14 = 0.f, 
+                                  float q10 = 0.f, float q11 = 0.f, float q12 = 0.f, float q13 = 0.f, float q14 = 0.f, 
                                   float q15 = 0.f, float q16 = 0.f, float q17 = 0.f, float q18 = 0.f );
                                 
         void setSharedCameraPose (const Eigen::Affine3d& pose);       

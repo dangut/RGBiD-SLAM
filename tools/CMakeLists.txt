@@ -25,6 +25,16 @@ add_executable(${the_target} ${srcs} ${hdrs})
 target_link_libraries(${the_target} ${PCL_LIBRARIES} ${OPENNI_LIBRARIES} ${Boost_LIBRARIES} ${CUDA_LIBRARIES} RGBID_SLAM)  
 target_link_libraries(${the_target} ${OpenCV_LIBS} ${catkin_LIBRARIES} ncurses) 	
 
+### BoW
+#set(the_target multisession_changes)
+#set(srcs multisession_BoW.cpp)
+
+#source_group("Source Files" FILES ${srcs} )
+
+#add_executable(${the_target} ${srcs} ${hdrs})
+#target_link_libraries(${the_target} ${PCL_LIBRARIES} ${OPENNI_LIBRARIES} ${Boost_LIBRARIES} ${CUDA_LIBRARIES} RGBID_SLAM)  
+#target_link_libraries(${the_target} ${OpenCV_LIBS} ${catkin_LIBRARIES} ncurses) 	
+
 
 
 #OPENNI_GRABBER 

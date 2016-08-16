@@ -70,6 +70,12 @@ RGBID_SLAM::Keyframe::Keyframe (Eigen::Matrix3d K, double kd1, double kd2, doubl
   pose_rel_me2next_.linear()  = rotation_rel;
   pose_rel_me2next_.translation() = translation_rel;
   Kinv_ = K_.inverse();
+  
+  mask_neg_list_.resize(bow_histogram_list_size);
+  masked_descriptors_.resize(bow_histogram_list_size);
+  masked_keypoints_.resize(bow_histogram_list_size);
+  bow_histogram_list_.resize(bow_histogram_list_size_);
+  bow_feature_vector_list_.resize(bow_histogram_list_size_);
 }
 
 RGBID_SLAM::Keyframe::~Keyframe ()
@@ -126,6 +132,76 @@ void RGBID_SLAM::Keyframe::freeUnneedMemory()
 }
 
     
+void RGBID_SLAM::Keyframe::computeMaskedDescriptors()
+{
+  static const float arr[] = {0.f, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f};
+  std::vector<float> neg_thresholds(arr, arr + sizeof(arr) / sizeof(arr[0]) );
+  int cols = negentropy_image_.cols;
+  int rows = negentropy_image_.rows;
+  
+  cv::Mat mask_neg = cv::Mat::ones(rows, cols, CV_8UC1);
+  
+  for (int mask_idx = 0; mask_idx < mask_neg_list_.size(); mask_idx++)
+  {
+    mask_neg.copyTo(mask_neg_list_[mask_idx]);
+  }
+  masked_descriptors_[0] = descriptors_;
+  masked_keypoints_[0] = keypoints_;
+  
+  if (mask_neg_list_.size() < 2)
+    return;
+  
+  for (int th_id = 0; th_id < neg_thresholds.size(); th_id++)
+  {
+    int valid_count = rows*cols;
+    for (int y=0; y<rows; y++)
+    {
+      for (int x=0; x<cols; x++)
+      {
+        if (negentropy_image_.ptr<float>(y)[x] <  neg_thresholds[th_id])
+        {
+          valid_count--; 
+          mask_neg.ptr<unsigned char>(y)[x] = 0; 
+        }      
+      }
+    }
+    
+    float masked_frac = ((float) (rows*cols - valid_count)) / ((float)(rows*cols));
+    
+    for (int mask_idx = 1; mask_idx < mask_neg_list_.size(); mask_idx++)
+    {
+      float threshold_frac = ((float) (mask_idx)) / ( (float) (mask_neg_list_.size()) );
+      if (masked_frac < threshold_frac)
+        mask_neg.copyTo(mask_neg_list_[mask_idx]);
+    }
+  }    
+  assert(keypoints_.size() == descriptors_.size());
+  
+  
+  for (int desc_idx = 0; desc_idx < descriptors_.size(); desc_idx++)
+  {
+    cv::KeyPoint kp = keypoints_[desc_idx];
+    int y = (int) (kp.pt.y +0.5f);
+    int x = (int) (kp.pt.x +0.5f);
+    
+    if ((y<0) || (y>=rows) ||  (x<0) || (x>=cols) )
+      continue;
+      
+    cv::Mat desc = descriptors_[desc_idx];
+    
+    for (int mask_idx = 1; mask_idx < mask_neg_list_.size(); mask_idx++)
+    {      
+      if (mask_neg_list_[mask_idx].ptr<unsigned char>(y)[x] == 1)
+      {        
+        masked_keypoints_[mask_idx].push_back(kp);
+        masked_descriptors_[mask_idx].push_back(desc);
+      }
+    }   
+  }
+  
+  std::cout << "end masking descs " << std::endl;
+}
+
 void RGBID_SLAM::Keyframe::lift2DKeypointsto3DPoints()
 {
   points3D_.clear();

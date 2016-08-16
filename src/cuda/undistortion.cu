@@ -131,11 +131,11 @@ namespace RGBID_SLAM
     {
       float wd = dp.c1*wm + dp.c0;
       
-      float D1,D0;
+      float D1, D0;
       
-      undistortDepthinv(D1, D0, u, v, dp);
+      undistortDepthinv(D0, D1, u, v, dp);
       
-      return D1*wd + D0;   
+      return (1.f+D1)*wd + D0;   
     }
     
     
@@ -251,6 +251,8 @@ namespace RGBID_SLAM
       cudaSafeCall ( cudaGetLastError () );
       cudaSafeCall(cudaStreamSynchronize(0));
       
+      cudaSafeCall (cudaDestroyTextureObject(src_tex));
+      
       return timer.getTime();
     };
     
@@ -302,6 +304,8 @@ namespace RGBID_SLAM
       undistortKernel<<<grid, block>>>(dst, intr, src_tex);
       cudaSafeCall ( cudaGetLastError () );
       cudaSafeCall(cudaStreamSynchronize(0));
+      
+      cudaSafeCall (cudaDestroyTextureObject(src_tex));
       
       return timer.getTime();
     };
