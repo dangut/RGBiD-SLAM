@@ -2,16 +2,16 @@
 
 RGBiD-SLAM is a direct and dense visual SLAM algorithm for RGB-D cameras running in CPU and GPU. The motion of the RGB-D camera is tracked by pixelwise minimisation of the photometric error as well as the geometric error expressed in inverse depth (iD) of the current frame with respect to a reference view. A smooth dense 3D reconstruction of the environment is computed by fusing close raw frames into one single keyframe. The system uses a Bag of Words approach to close loops and improve the reconstrction and provides also in real-time a segmentation of the scene based on the structure of its elements.
 
-# Related Publications
+## Related Publications
 
 [1] D. Gutierrez-Gomez, W. Mayol-Cuevas, J.J. Guerrero. Inverse Depth for Accurate Photometric and Geometric Error Minimisation in RGB-D Dense Visual Odometry. In Proc. IEEE/RSJ Int. Conf. on Robotics and Automation (ICRA). 2015.
 
 [2] D. Gutierrez-Gomez, W. Mayol-Cuevas, J.J. Guerrero. Dense rgb-d visual odometry using inverse depth. Robotics and Autonomous Systems (RAS), 75(Part B):571 – 583. Special Section on 3D Perception with PCL. 2016.
 
-# License
+## License
 RGBiD-SLAM is licensed under GNU General Public License Version 3 (see LICENSE.txt)
 
-# Dependencies
+## Dependencies
 
 This code has been compiled and executed succesfully in Ubuntu 12.04 64 bits system with ros hydro and Ubuntu 14.04 64 bits with ros indigo.
 Apart from off-line sequences recorded in the TUM dataset format, on-line it has been tested only with an Asus Xtion Pro Live RGB-D camera.
@@ -39,7 +39,7 @@ If you are using the Asus Xtion Pro Live camera you have execute this in console
 Then find the line that says ";UsbInterface=2" and uncomment it. Save the file.
 
 
-# Compilation
+## Compilation
 
 Download the repository in a zip file
 
@@ -73,7 +73,7 @@ Unzip ~/RGBiD-SLAM/data/ORBvoc.yml.zip
 
 Then copy configuration files from ~/RGBiD-SLAM/config_data into ~/RGBiD-SLAM/build/tools/
 
-#Usage
+## Usage
 
 
 Plug your Asus Xtion Pro Live and do
