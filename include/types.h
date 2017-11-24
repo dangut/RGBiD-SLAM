@@ -494,6 +494,7 @@ namespace RGBID_SLAM
   typedef Eigen::Matrix<float_trafos,6,1> Vector6ft;
   typedef Eigen::Matrix<float_trafos, 4, 4, Eigen::RowMajor> Matrix4ft;
   typedef Eigen::Matrix<float_trafos, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixXft;
+  typedef Eigen::Transform<float_trafos, 3, Eigen::Isometry> Isometry3ft;
   
   typedef Eigen::Matrix<float, 3, 3, Eigen::RowMajor> Matrix3f;
   typedef Eigen::Matrix<float,3,1> Vector3f;

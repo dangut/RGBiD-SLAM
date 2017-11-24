@@ -2190,7 +2190,8 @@ RGBID_SLAM::VisodoTracker::trackNewFrame()
     //std::cout << "visibility ratio: " << visibility_ratio_integr << std::endl;
     {
       //pcl::ScopeTime t_kf ("keyframe integration");
-      
+      std::cout << "pop buffer size: " << pop_depthinv_buffer_ptr->size() << std::endl;
+      std::cout << "push buffer size: " << push_depthinv_buffer_ptr->size() << std::endl;
       
       if ( ( integrKF_count_ >= max_integrKF_count_ ) || (visibility_ratio_integr < visibility_ratio_integr_threshold_) )
       {	   
@@ -2204,8 +2205,8 @@ RGBID_SLAM::VisodoTracker::trackNewFrame()
         swapBufferPointers();
         push_depthinv_buffer_ptr->clear();
         
-        if (!pop_depthinv_buffer_ptr->empty())
-          pop_depthinv_buffer_ptr->pop_back();          
+        //if (!pop_depthinv_buffer_ptr->empty())
+          //pop_depthinv_buffer_ptr->pop_back();   
       }
       else
       {
@@ -2215,16 +2216,32 @@ RGBID_SLAM::VisodoTracker::trackNewFrame()
       }
     
       if (!pop_depthinv_buffer_ptr->empty()) 
-      {        
-        Matrix3ft delta_back_integr_rotation = last_integrKF_global_rotation_.inverse()*rmats_[global_time_-integrKF_count_-backwards_integrKF_count_-1];
-        Vector3ft delta_back_integr_translation = last_integrKF_global_rotation_.inverse()*(tvecs_[global_time_-integrKF_count_-backwards_integrKF_count_-1] - last_integrKF_global_translation_);
+      {      
         
-        integrateImagesIntoKeyframes ((pop_depthinv_buffer_ptr->back()), intr, delta_back_integr_rotation, delta_back_integr_translation); 
-                     
+        Eigen::Isometry3d integrated_pose = pop_depthinv_buffer_ptr->back().first;
+        DeviceArray2D<float>& integrated_frame = pop_depthinv_buffer_ptr->back().second;
+        
+        Matrix3ft delta_back_integr_rotation = last_integrKF_global_rotation_.inverse()*integrated_pose.linear();
+        Vector3ft delta_back_integr_translation = last_integrKF_global_rotation_.inverse()*(integrated_pose.translation() - last_integrKF_global_translation_);
+        integrateImagesIntoKeyframes (integrated_frame, intr, delta_back_integr_rotation, delta_back_integr_translation); 
+        
+        //Matrix3ft delta_back_integr_rotation = last_integrKF_global_rotation_.inverse()*rmats_[global_time_-integrKF_count_-backwards_integrKF_count_-1];
+        //Vector3ft delta_back_integr_translation = last_integrKF_global_rotation_.inverse()*(tvecs_[global_time_-integrKF_count_-backwards_integrKF_count_-1] - last_integrKF_global_translation_);
+        
+        //integrateImagesIntoKeyframes ((pop_depthinv_buffer_ptr->back()), intr, delta_back_integr_rotation, delta_back_integr_translation); 
+        integrated_frame.release();             
         pop_depthinv_buffer_ptr->pop_back();  
         backwards_integrKF_count_++; 
       } 
       
+      Eigen::Isometry3d last_pose;
+      last_pose.linear() = last_estimated_rotation_;
+      last_pose.translation() = last_estimated_translation_;
+      DeviceArray2D<float> last_frame;
+      last_frame.create(rows_, cols_);
+      depthinvs_curr_[0].copyTo(last_frame);
+      
+      push_depthinv_buffer_ptr->push_back(std::make_pair(last_pose, last_frame));
       //saveIntegrationKeyframesAsOdoKeyframes(intr);     
     }
     

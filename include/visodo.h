@@ -292,10 +292,15 @@ namespace RGBID_SLAM
         DeviceArray2D<float> warped_weight_curr_;
         DeviceArray2D<float> weight_integrKF_;
         
-        std::deque<DeviceArray2D<float> > depthinv_buffer1;
-        std::deque<DeviceArray2D<float> > depthinv_buffer2;
-        std::deque<DeviceArray2D<float> >* pop_depthinv_buffer_ptr;
-        std::deque<DeviceArray2D<float> >* push_depthinv_buffer_ptr;
+        //std::deque<DeviceArray2D<float> > depthinv_buffer1;
+        //std::deque<DeviceArray2D<float> > depthinv_buffer2;
+        //std::deque<DeviceArray2D<float> >* pop_depthinv_buffer_ptr;
+        //std::deque<DeviceArray2D<float> >* push_depthinv_buffer_ptr;
+        
+        std::deque<std::pair<Eigen::Isometry3d, DeviceArray2D<float> >, Eigen::aligned_allocator< std::pair< Eigen::Isometry3d, DeviceArray2D<float> > > > depthinv_buffer1;
+        std::deque<std::pair<Eigen::Isometry3d, DeviceArray2D<float> >, Eigen::aligned_allocator< std::pair< Eigen::Isometry3d, DeviceArray2D<float> > > > depthinv_buffer2;
+        std::deque<std::pair<Eigen::Isometry3d, DeviceArray2D<float> >, Eigen::aligned_allocator< std::pair< Eigen::Isometry3d, DeviceArray2D<float> > > >* pop_depthinv_buffer_ptr;
+        std::deque<std::pair<Eigen::Isometry3d, DeviceArray2D<float> >, Eigen::aligned_allocator< std::pair< Eigen::Isometry3d, DeviceArray2D<float> > > >* push_depthinv_buffer_ptr;
         
         
         MapArr vertices_integrKF_;
