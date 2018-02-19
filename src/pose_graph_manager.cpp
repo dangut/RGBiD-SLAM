@@ -87,7 +87,7 @@ RGBID_SLAM::PoseGraph::buildGraph(const std::vector<Pose> &poses, const std::vec
     //Debugging
     for (int i=0; i<7; i++)
     {
-      if (isnan(trafo[i]))
+      if (std::isnan(trafo[i]))
       {
         std::cout << "Pose " << (*p_it).id_ << " is a nan " << std::endl;
         break;

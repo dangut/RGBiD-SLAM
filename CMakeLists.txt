@@ -69,7 +69,7 @@ include(${CMAKE_SOURCE_DIR}/cmake_modules/pcl_find_cuda.cmake)
 #DBoW2
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/DBoW2/DBoW2/include/ ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/DBoW2/DUtils/include/DUtils/)	
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/DBoW2/lib)
-
+message(${OpenCV_INCLUDE_DIRS})
 #pcl_gpu_containers
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/pcl_gpu_containers/include)	
 #link_directories(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/pcl_gpu_containers/lib)
@@ -89,6 +89,16 @@ endif()
     
 set(build TRUE)
 if (build)
+        get_directory_property(_dir_defs DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITIONS)
+    set(_vtk_definitions)
+    foreach(_item ${_dir_defs})
+        if(_item MATCHES "vtk*")
+            list(APPEND _vtk_definitions -D${_item})
+        endif()
+    endforeach()
+message(${_vtk_definitions})
+remove_definitions(${_vtk_definitions})
+
 	FILE(GLOB incs include/*.h*)
 	FILE(GLOB srcs src/*.cpp src/*.h*)
 	FILE(GLOB cuda src/cuda/*.cu src/cuda/*.h*)
@@ -108,13 +118,13 @@ if (build)
 	
   #set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} "--ftz=true;--prec-div=false;--prec-sqrt=false;--ptxas-options=-v ")		
   set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} "--ftz=true;--prec-div=false;--prec-sqrt=false ")		
-  message (${CUDA_NVCC_FLAGS})
+#  message (${CUDA_NVCC_FLAGS})
 	CUDA_COMPILE(cuda_objs ${cuda})	
 	
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -o3")	
 	 
 	add_library(RGBID_SLAM ${srcs} ${incs} ${impl_incs} ${cuda} ${cuda_objs})
-	message(RGBID_SLAM ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${CUDA_LIBRARIES} DBoW2 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/pcl_gpu_containers/lib/libpcl_gpu_containers.so  ${G2O_LIBS})
+#	message(RGBID_SLAM ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${CUDA_LIBRARIES} DBoW2 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/pcl_gpu_containers/lib/libpcl_gpu_containers.so  ${G2O_LIBS})
 	target_link_libraries(RGBID_SLAM  ${Boost_LIBRARIES} ${CUDA_LIBRARIES} ${PCL_LIBRARIES} DBoW2 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/pcl_gpu_containers/lib/libpcl_gpu_containers.so  ${G2O_LIBS})
   if(OpenCV_FOUND) 
      target_link_libraries(RGBID_SLAM ${OpenCV_LIBS}) 
