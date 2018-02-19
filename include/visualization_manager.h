@@ -37,6 +37,21 @@
 //#include "internal.h"
 #include "types.h"
 
+//#include <vtkSmartPointer.h>
+//#include <vtkImageViewer2.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+
+#include <vtkImageData.h>
+#include <vtkImageMapper.h> // Note: this is a 2D mapper (cf. vtkImageActor which is 3D)
+#include <vtkActor2D.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkSmartPointer.h>
+#include <vtkImageFlip.h>
+
 //////////////////////////////////////////
 
 
@@ -48,12 +63,51 @@ namespace RGBID_SLAM
     ImageView();
     
     void 
-    setViewer(int pos_x, int pos_y, std::string window_name= "Kinect RGB stream");
+    setViewer(int pos_x, int pos_y, std::string window_name= "Image viewer", float min_val = 0.f, float max_val = 255.f);
     
-    void 
-    showRGB (const PtrStepSz<const PixelRGB>& rgb24);
+    void
+    showRGB (std::vector<PixelRGB>& rgb24, int cols, int rows);
     
-    pcl::visualization::ImageViewer viewerRGB_; 
+    void
+    showDepth (std::vector<unsigned short>& depth, int cols, int rows);
+    
+    void
+    showFloat (std::vector<float>& intensity, int cols, int rows);
+    
+    
+    
+    private:
+      void
+      addRGB (std::vector<PixelRGB>& rgb24, int cols, int rows);
+    
+      template<class T> void
+      transformToRGB(std::vector<T>&in, std::vector<PixelRGB>& rgb24)
+      {
+        rgb24.resize(in.size());
+        
+        for (int i=0; i<in.size(); i++){
+          float value = static_cast<float> (in[i]);
+          float value_norm = (value - min_val_)/ (max_val_-min_val_);
+          value_norm = std::max(0.f, std::min(1.f, value_norm));
+          
+          PixelRGB rgb_val;
+          rgb_val.r = rgb_val.b = rgb_val.g = static_cast<unsigned char>(255.f*value_norm);
+          rgb24[i] = rgb_val;        
+        }
+      }
+    //pcl::visualization::ImageViewer viewerRGB_; 
+    //vtkSmartPointer<vtkImageViewer2> viewer_;
+    //vtkSmartPointer<vtkRenderWindowInteractor> interactor_;
+    
+    vtkSmartPointer<vtkImageMapper> mapper_; 
+    vtkSmartPointer<vtkActor2D> image_;
+    vtkSmartPointer<vtkRenderer> renderer_ ;
+    vtkSmartPointer<vtkRenderWindow> window_ ;
+    vtkSmartPointer<vtkRenderWindowInteractor> interactor_ ;
+    vtkSmartPointer<vtkImageFlip> flipper_;
+    
+    float min_val_;
+    float max_val_;
   };
     
 
@@ -185,7 +239,8 @@ namespace RGBID_SLAM
     private:
       
       CameraView camera_viewer_;
-      FloatView intensity_viewer_;
+      //FloatView intensity_viewer_;
+      ImageView intensity_viewer_;
       ImageView scene_viewer_;
       ImageView negentropy_viewer_;
       //ImageView segmentation_viewer_;

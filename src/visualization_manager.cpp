@@ -36,23 +36,98 @@ static boost::mutex display_mutex_;
 RGBID_SLAM::ImageView::ImageView()
 {
   boost::mutex::scoped_lock lock(display_mutex_);
-  viewerRGB_.setWindowTitle ("RGB stream");
+  //viewerRGB_.setWindowTitle ("RGB stream");
   //viewerRGB_.setPosition (0, 0);
+
+  mapper_ = vtkSmartPointer<vtkImageMapper>::New();
+  mapper_->SetColorWindow(255); // width of the color range to map to
+  mapper_->SetColorLevel(127.5); // center of the color range to map to
+
+  image_ = vtkSmartPointer<vtkActor2D>::New();
+  image_->SetMapper(mapper_);
+  
+  flipper_ = vtkSmartPointer<vtkImageFlip>::New ();
+  // Prepare for image flip
+  flipper_->SetInterpolationModeToCubic ();
+  flipper_->PreserveImageExtentOn ();
+  flipper_->FlipAboutOriginOn ();
+  flipper_->SetFilteredAxis (1);
+
+  renderer_ = vtkSmartPointer<vtkRenderer>::New();
+  renderer_->AddActor(image_);
+
+  window_ = vtkSmartPointer<vtkRenderWindow>::New();
+  window_->AddRenderer(renderer_);
+  window_->SetSize (640, 480);
+  window_->SetWindowName ("RGB stream");
+
+  interactor_ = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+  interactor_->SetRenderWindow(window_);
 }
   
 void
-RGBID_SLAM::ImageView::setViewer(int pos_x, int pos_y, std::string window_name)
+RGBID_SLAM::ImageView::setViewer(int pos_x, int pos_y, std::string window_name, float min_val, float max_val)
 {
   boost::mutex::scoped_lock lock(display_mutex_);
-  viewerRGB_.setWindowTitle (window_name);
-  viewerRGB_.setPosition (pos_x, pos_y);
-}
+  //viewerRGB_.setWindowTitle (window_name);
+  //viewerRGB_.setPosition (pos_x, pos_y);
+  window_->SetWindowName (window_name.c_str());
+  window_->SetPosition(pos_x, pos_y);
   
+  min_val_ = min_val;
+  max_val_ = max_val;
+  
+}
+ 
 void
-RGBID_SLAM::ImageView::showRGB (const PtrStepSz<const PixelRGB>& rgb24) 
-{ 
+RGBID_SLAM::ImageView::addRGB (std::vector<PixelRGB>& rgb24, int cols, int rows){
+  window_->SetSize(cols, rows);
+  //unsigned char* data_rgb = const_cast<unsigned char*> (reinterpret_cast<const unsigned char*> (&rgb24[0]));
+  unsigned char* data_rgb = (reinterpret_cast<unsigned char*> (&rgb24[0]));
+  void* data = (reinterpret_cast<void*> (data_rgb));
+  
+  vtkSmartPointer<vtkImageData> image = vtkSmartPointer<vtkImageData>::New ();
+  image->SetExtent (0, cols - 1, 0, rows - 1, 0, 0);
+  image->AllocateScalars (VTK_UNSIGNED_CHAR, 3);
+  image->GetPointData ()->GetScalars ()->SetVoidArray (data, 3 * cols * rows, 1);
+  flipper_->SetInputData (image);
+  flipper_->Update();
+  mapper_->SetInputConnection (flipper_->GetOutputPort ());
+}
+
+void
+RGBID_SLAM::ImageView::showRGB (std::vector<PixelRGB>& rgb24, int cols, int rows){
+  
+  addRGB(rgb24, cols, rows);
+  
   boost::mutex::scoped_lock lock(display_mutex_);
-  viewerRGB_.showRGBImage ((unsigned char*)&rgb24.data[0], rgb24.cols, rgb24.rows);
+  
+  window_->Render();
+}
+
+
+void
+RGBID_SLAM::ImageView::showDepth (std::vector<unsigned short>& depth, int cols, int rows){
+  
+  std::vector<PixelRGB> rgb24;
+  transformToRGB(depth, rgb24);
+  
+  addRGB(rgb24, cols, rows);
+  
+  boost::mutex::scoped_lock lock(display_mutex_);
+  window_->Render();
+}
+
+void
+RGBID_SLAM::ImageView::showFloat (std::vector<float>& intensity, int cols, int rows){
+  
+  std::vector<PixelRGB> rgb24;
+  transformToRGB(intensity, rgb24);
+  
+  addRGB(rgb24, cols, rows);
+  
+  boost::mutex::scoped_lock lock(display_mutex_);
+  window_->Render();
 }
 
 RGBID_SLAM::FloatView::FloatView()
@@ -481,7 +556,7 @@ RGBID_SLAM::VisualizationManager::VisualizationManager()
   scene_viewer_.setViewer(0,700,"Integrated depth view");
   //intensity_warped_viewer_.setViewer(640,700,0.f,255.f,"warped intensity view");
   //segmentation_viewer_.setViewer(cols_,700,"RGB view");
-  intensity_viewer_.setViewer(cols_,700,0.f,255.f,"RGB view");
+  intensity_viewer_.setViewer(cols_,700,"RGB view",0.f,255.f);
   negentropy_viewer_.setViewer(2*cols_,700,"Negentropy view");
   scene_view_.resize(cols_*rows_);
   intensity_view_.resize(cols_*rows_,0.f);
@@ -637,8 +712,10 @@ RGBID_SLAM::VisualizationManager::refresh()
   
   if (redraw_scene_view_)
   {
-    scene_viewer_.viewerRGB_.showRGBImage (reinterpret_cast<unsigned char*> (&scene_view_[0]), cols_, rows_);
-    intensity_viewer_.viewerFloat_.showFloatImage(&intensity_view_[0], cols_, rows_, intensity_viewer_.min_val_, intensity_viewer_.max_val_,true);
+    //scene_viewer_.viewerRGB_.addRGBImage (reinterpret_cast<unsigned char*> (&scene_view_[0]), cols_, rows_);
+    //scene_viewer_.viewerRGB_.spinOnce();
+    scene_viewer_.showRGB(scene_view_, cols_, rows_);
+    intensity_viewer_.showFloat(intensity_view_, cols_, rows_);
     redraw_scene_view_ = false;
   }
     
@@ -650,7 +727,7 @@ RGBID_SLAM::VisualizationManager::refresh()
   
   if (redraw_keyframe_)
   {
-    negentropy_viewer_.viewerRGB_.showRGBImage (reinterpret_cast<unsigned char*> (&negentropy_view_[0]), cols_, rows_);
+    negentropy_viewer_.showRGB(negentropy_view_, cols_, rows_);
     //segmentation_viewer_.viewerRGB_.showRGBImage (reinterpret_cast<unsigned char*> (&segmentation_view_[0]), cols_, rows_);
     redraw_keyframe_ = false;
   }
