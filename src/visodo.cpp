@@ -575,7 +575,8 @@ RGBID_SLAM::VisodoTracker::getImage (std::vector<PixelRGB>& scene_view, std::vec
   RGBID_SLAM::device::sync ();
   
   scene_view_dev.download(scene_view, cols_);
-  intensities_curr_[0].download(intensity_view, cols_);
+  //intensities_curr_[0].download(intensity_view, cols_);
+  weight_integrKF_.download(intensity_view, cols_);
   depthinv_integrKF_.download(depthinv_view, cols_);
 }
 
@@ -682,7 +683,7 @@ RGBID_SLAM::VisodoTracker::allocateBuffers (int rows, int cols)
     res_depthinvs_[i].create(pyr_rows * pyr_cols);	
   }  
   
-  // see estimate tranform for the magic numbers
+  // see estimate_VO for the magic numbers
   gbuf_.create (27, 20*60);
   sumbuf_.create (27);
   
@@ -805,8 +806,6 @@ RGBID_SLAM::VisodoTracker::prepareImagesCustomCalibration (const DepthMap& depth
   t_dc_proj_dev = device_cast<float3>(t_dc_proj_f);
   cRd_proj_dev = device_cast<Mat33>(cRd_proj_f); 
   dRc_proj_dev = device_cast<Mat33>(dRc_proj_f);
-  
-  
   
   timeRegister += registerDepthinv(depthinv_preregister_, depthinv_register_trans_, depthinv_register_trans_as_int_, depthinvs_curr_[0], dRc_proj_dev, t_dc_proj_dev, cRd_proj_dev);
   //timeRegister += registerDepthinv(depthinv_preregister_, depthinv_preregister_, depthinv_register_trans_as_int_, depthinvs_curr_[0], dRc_proj_dev, t_dc_proj_dev, cRd_proj_dev);
@@ -1628,6 +1627,8 @@ RGBID_SLAM::VisodoTracker::resetIntegrationKeyframe()
   Eigen::Matrix<double,6,6> delta_covariance_kf = dDT_by_dTlast*delta_covariance_odo2integr_last_*dDT_by_dTlast.transpose()+ 
                                                    dDT_by_dTnew*delta_covariance_odo2integr_next_*dDT_by_dTnew.transpose();  
   
+  float filter_th = 10.f;
+  filterDepthMap(depthinv_integrKF_, weight_integrKF_, filter_th);
   {          
     KeyframePtr keyframe_new_ptr(new Keyframe(getCalibMatrix(0).cast<double>(), k1_, k2_, k3_, k4_, k5_,
                                               last_integrKF_global_rotation_.cast<double>(), last_integrKF_global_translation_.cast<double>(), 
@@ -2225,10 +2226,6 @@ RGBID_SLAM::VisodoTracker::trackNewFrame()
         Vector3ft delta_back_integr_translation = last_integrKF_global_rotation_.inverse()*(integrated_pose.translation() - last_integrKF_global_translation_);
         integrateImagesIntoKeyframes (integrated_frame, intr, delta_back_integr_rotation, delta_back_integr_translation); 
         
-        //Matrix3ft delta_back_integr_rotation = last_integrKF_global_rotation_.inverse()*rmats_[global_time_-integrKF_count_-backwards_integrKF_count_-1];
-        //Vector3ft delta_back_integr_translation = last_integrKF_global_rotation_.inverse()*(tvecs_[global_time_-integrKF_count_-backwards_integrKF_count_-1] - last_integrKF_global_translation_);
-        
-        //integrateImagesIntoKeyframes ((pop_depthinv_buffer_ptr->back()), intr, delta_back_integr_rotation, delta_back_integr_translation); 
         integrated_frame.release();             
         pop_depthinv_buffer_ptr->pop_back();  
         backwards_integrKF_count_++; 

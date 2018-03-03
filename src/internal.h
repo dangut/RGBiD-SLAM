@@ -433,6 +433,9 @@ namespace RGBID_SLAM
     float
     bilateralFilter (const DeviceArray2D<float>& src, DeviceArray2D<float>& dst, const float sigma_floatmap, int numSMs = -1);
     
+    float
+    filterDepthMap( DepthMapf& depth, const DeviceArray2D<float>& weight, float filter_th, int numSMs = -1);
+    
     float 
     undistortIntensity(IntensityMapf& src, IntensityMapf& dst, const Intr& intr_int, int numSMs = -1);    
     

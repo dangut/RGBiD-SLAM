@@ -133,6 +133,28 @@ namespace RGBID_SLAM
           }
         }
       }
+      
+      __global__ void
+      filterDepthMapKernel (PtrStepSz<float> depth, 
+                            const PtrStep<float> weights, 
+                            const float filter_th)
+      {
+        unsigned int tid_x = blockIdx.x * blockDim.x + threadIdx.x;  
+        unsigned int tid_y = blockIdx.y * blockDim.y + threadIdx.y; 
+         
+        for (unsigned int x = tid_x;   x < depth.cols; x += blockDim.x * gridDim.x)
+        { 
+          for (unsigned int y = tid_y;   y < depth.rows; y += blockDim.y * gridDim.y)    
+          { 
+          
+            float weight_value = weights.ptr (y)[x];
+            
+            if (weight_value < filter_th){
+              depth.ptr (y)[x] = numeric_limits<float>::quiet_NaN ();
+            }
+          }
+        }
+      }
 
       
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -160,6 +182,30 @@ namespace RGBID_SLAM
         
         return timer.getTime();
       };
+      
+      
+      float filterDepthMap( DepthMapf& depth, const DeviceArray2D<float>& weight, float filter_th, int numSMs)
+      {
+        cudaTimer timer;      
+        
+        dim3 block (32, 8);
+        
+        int gridX = divUp(depth.cols(), block.x);
+        int gridY = divUp(depth.rows(), block.y);
+        
+        computeBlockDim2D(gridX, gridY, 32, 8, depth.cols (), depth.rows (), numSMs);
+        
+        dim3 grid (gridX, gridY);
+        
+        filterDepthMapKernel<<<grid, block>>>(depth, weight, filter_th);
+        cudaSafeCall ( cudaGetLastError () );
+        cudaSafeCall (cudaStreamSynchronize(0));   
+        
+        cudaSafeCall ( cudaGetLastError () );
+        cudaSafeCall (cudaStreamSynchronize(0)); 
+        
+        return timer.getTime();         
+      }
 
     
   }
