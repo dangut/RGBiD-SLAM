@@ -1576,8 +1576,6 @@ RGBID_SLAM::VisodoTracker::resetOdometryKeyframe()
 inline void
 RGBID_SLAM::VisodoTracker::resetIntegrationKeyframe()
 {
-  integrKF_count_ = 0;
-  backwards_integrKF_count_ = 0;
   //Save data of last keyframe
   rmatsKF_.push_back(last_integrKF_global_rotation_);
   tvecsKF_.push_back(last_integrKF_global_translation_);
@@ -1627,7 +1625,21 @@ RGBID_SLAM::VisodoTracker::resetIntegrationKeyframe()
   Eigen::Matrix<double,6,6> delta_covariance_kf = dDT_by_dTlast*delta_covariance_odo2integr_last_*dDT_by_dTlast.transpose()+ 
                                                    dDT_by_dTnew*delta_covariance_odo2integr_next_*dDT_by_dTnew.transpose();  
   
-  float filter_th = 10.f;
+  
+  float num_integr_frames = backwards_integrKF_count_ + integrKF_count_;
+  float filter_th = 0.3f*num_integr_frames;
+  //std::vector<float> intensity_view_ordered;
+  //weight_integrKF_.download(intensity_view_ordered,cols_);
+  //std::sort(intensity_view_ordered.begin(), intensity_view_ordered.end());
+  //char filename[128];
+  //sprintf(filename, "weights_log%03d.txt", global_time_);
+  //std::ofstream weights_log;
+  //weights_log.open(filename);
+  //weights_log << "num integr kfs: " << backwards_integrKF_count_ + integrKF_count_ << std::endl;
+  //for (const auto& weight : intensity_view_ordered){
+    //weights_log << weight << std::endl;
+  //}
+      
   filterDepthMap(depthinv_integrKF_, weight_integrKF_, filter_th);
   {          
     KeyframePtr keyframe_new_ptr(new Keyframe(getCalibMatrix(0).cast<double>(), k1_, k2_, k3_, k4_, k5_,
@@ -1657,7 +1669,9 @@ RGBID_SLAM::VisodoTracker::resetIntegrationKeyframe()
   kf_times_.push_back(1000.f*kf_time_accum_);
   kf_time_accum_ = 0.f;
                      
-  //Switch to new keyframe        
+  //Switch to new keyframe  
+  integrKF_count_ = 0;
+  backwards_integrKF_count_ = 0;      
   last_integrKF_index_ = global_time_;
   
   last_integrKF_global_rotation_ = last_estimated_rotation_; 
@@ -2199,7 +2213,7 @@ RGBID_SLAM::VisodoTracker::trackNewFrame()
         resetIntegrationKeyframe();   
       
         computeOverlapping(intr, delta_integr_rotation, delta_integr_translation, 
-                   depthinv_integrKF_raw_, depthinvs_curr_[0], overlap_mask_integrKF_);
+                   depthinv_integrKF_, depthinvs_curr_[0], overlap_mask_integrKF_);
                    
         saveCurrentImagesAsIntegrationKeyframes (intr, rgb24_); 
         
@@ -2248,7 +2262,7 @@ RGBID_SLAM::VisodoTracker::trackNewFrame()
       boost::mutex::scoped_lock lock(mutex_scene_view_);
       
       getImage(scene_view_, intensity_view_, depthinv_view_);
-      scene_view_has_changed_ = true;      
+      scene_view_has_changed_ = true;  
     }
     
     

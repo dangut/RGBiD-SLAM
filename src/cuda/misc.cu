@@ -278,7 +278,7 @@ namespace RGBID_SLAM
       if (x >= src_depth.cols || y >= src_depth.rows)
         return;
         
-      float weight = 1.f;
+      float weight = 0.1f;
       
       if (!isnan(src_depth.ptr (y)[x]))
       	weight = 1.f;
