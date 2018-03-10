@@ -2239,8 +2239,8 @@ RGBID_SLAM::VisodoTracker::trackNewFrame()
     //std::cout << "visibility ratio: " << visibility_ratio_integr << std::endl;
     {
       //pcl::ScopeTime t_kf ("keyframe integration");
-      std::cout << "pop buffer size: " << pop_depthinv_buffer_ptr->size() << std::endl;
-      std::cout << "push buffer size: " << push_depthinv_buffer_ptr->size() << std::endl;
+      //std::cout << "pop buffer size: " << pop_depthinv_buffer_ptr->size() << std::endl;
+      //std::cout << "push buffer size: " << push_depthinv_buffer_ptr->size() << std::endl;
       
       if ( ( integrKF_count_ >= max_integrKF_count_ ) || (visibility_ratio_integr < visibility_ratio_integr_threshold_) )
       {	   

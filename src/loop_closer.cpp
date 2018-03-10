@@ -561,7 +561,6 @@ RGBID_SLAM::LoopCloser::selectRandomMatches(int RANSAC_min_points, std::vector <
   
   if (selectionable_size < RANSAC_min_points)
   {
-    
     std::cout << "Not enough points for RANSAC" << std::endl;
     return;
   }

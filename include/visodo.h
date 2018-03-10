@@ -83,7 +83,6 @@ namespace RGBID_SLAM
         
         inline void stop()
         {
-          std::cout << "STOP visodo" << std::endl;
           stop_flag_ = true;
         }
         
