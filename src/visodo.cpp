@@ -434,15 +434,15 @@ void RGBID_SLAM::VisodoTracker::loadSettings (Settings &settings)
   }
 }
 
-void
-RGBID_SLAM::VisodoTracker::start()
-{
-  boost::unique_lock<boost::mutex> lock(created_aux_mutex_);
+//void
+//RGBID_SLAM::VisodoTracker::start()
+//{
+  //boost::unique_lock<boost::mutex> lock(created_aux_mutex_);
   
-  visodo_thread_.reset(new boost::thread(boost::ref(*this)));
+  //visodo_thread_.reset(new boost::thread(boost::ref(*this)));
   
-  created_cond_.wait (lock);
-}
+  //created_cond_.wait (lock);
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -575,8 +575,8 @@ RGBID_SLAM::VisodoTracker::getImage (std::vector<PixelRGB>& scene_view, std::vec
   RGBID_SLAM::device::sync ();
   
   scene_view_dev.download(scene_view, cols_);
-  //intensities_curr_[0].download(intensity_view, cols_);
-  weight_integrKF_.download(intensity_view, cols_);
+  intensities_curr_[0].download(intensity_view, cols_);
+  //weight_integrKF_.download(intensity_view, cols_);
   depthinv_integrKF_.download(depthinv_view, cols_);
 }
 
@@ -1686,6 +1686,40 @@ RGBID_SLAM::VisodoTracker::resetIntegrationKeyframe()
   delta_covariance_odo2integr_next_ = Eigen::Matrix<double,6,6>::Zero();
 }
 
+//same routine as resetIntegrationKeyframe but without any cov comp or constraint pushing because this is the last kf to be pushed
+inline void
+RGBID_SLAM::VisodoTracker::stopRoutine(){
+  rmatsKF_.push_back(last_integrKF_global_rotation_);
+  tvecsKF_.push_back(last_integrKF_global_translation_);
+  
+  delta_translation_odo2integr_next_ = delta_rotation_odo2integr_next_*delta_translation_ + delta_translation_odo2integr_next_;
+  delta_rotation_odo2integr_next_ = delta_rotation_odo2integr_next_*delta_rotation_;
+  
+  //TODO: create new constraint and push_back in constraints buffer
+  //Convert odo keyframe constraints (KF_last,i) to sequential constraints (i-1,i) for pose graph
+  //T{k-1,k} = inv(T{odo,k-1})*T{odo,k}
+  Matrix3ft delta_rotation_kf = delta_rotation_odo2integr_last_.transpose()*delta_rotation_odo2integr_next_;
+  Vector3ft delta_translation_kf = delta_rotation_odo2integr_last_.transpose()*(delta_translation_odo2integr_next_ - delta_translation_odo2integr_last_);  
+  
+  float num_integr_frames = backwards_integrKF_count_ + integrKF_count_;
+  float filter_th = 0.3f*num_integr_frames;
+  
+  filterDepthMap(depthinv_integrKF_, weight_integrKF_, filter_th);
+  
+  KeyframePtr keyframe_new_ptr(new Keyframe(getCalibMatrix(0).cast<double>(), k1_, k2_, k3_, k4_, k5_,
+                                              last_integrKF_global_rotation_.cast<double>(), last_integrKF_global_translation_.cast<double>(), 
+                                              delta_rotation_kf.cast<double>(),delta_translation_kf.cast<double>(),
+                                              last_integrKF_index_,cols_, rows_));  
+                                              
+  overlap_mask_integrKF_.download(keyframe_new_ptr->overlap_mask_, cols_);
+  colors_integrKF_.download(keyframe_new_ptr->colors_, cols_);
+  depthinv_integrKF_.download(keyframe_new_ptr->depthinv_ , cols_);
+  normals_integrKF_.download(keyframe_new_ptr->normals_, cols_);
+  
+  keyframe_manager_ptr_->buffer_keyframes_.try_push(keyframe_new_ptr);    
+  kf_times_.push_back(1000.f*kf_time_accum_);
+}
+
 inline void
 RGBID_SLAM::VisodoTracker::integrateImagesIntoKeyframes (DepthMapf& depthinv_src, const Intr cam_intrinsics, Matrix3ft integration_delta_rotation , Vector3ft integration_delta_translation)
 {
@@ -2280,15 +2314,20 @@ RGBID_SLAM::VisodoTracker::operator() ()
   boost::unique_lock<boost::mutex> lock(mutex_);
   exit_ = false;
   
-  {
-    boost::mutex::scoped_try_lock lock(created_aux_mutex_);
-    created_cond_.notify_one();
-  }
+  //{
+    //boost::mutex::scoped_try_lock lock(created_aux_mutex_);
+    //created_cond_.notify_one();
+  //}
   
-  while (!exit_)
+  while (!exit_ && !stop_flag_)
   {
     new_frame_cond_.wait (lock);
     trackNewFrame();   
+  }
+  
+  std::cout << "out of visodo loop" << std::endl;
+  if (stop_flag_){
+    stopRoutine();
   }
 
   return (true);

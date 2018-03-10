@@ -209,6 +209,7 @@ struct RGBID_SLAMApp
         boost::this_thread::sleep (boost::posix_time::millisec (30)); 
       }
     }
+    (visodo_->new_frame_cond_).notify_one();  
     
     exit_ = true;  
   }
@@ -460,7 +461,8 @@ main (int argc, char* argv[])
     (app.visodo_)->start();
     //Visualization will run in the main thread. Dont start
     
-    boost::this_thread::sleep (boost::posix_time::millisec (1)); 
+    //Wait threads to initialize
+    boost::this_thread::sleep (boost::posix_time::millisec (1000)); 
     
     
     if (app.evaluation_ptr_)
@@ -480,7 +482,8 @@ main (int argc, char* argv[])
     }
     
     
-    //(app.visodo_)->stop();
+    (app.visodo_)->stop();
+    (app.visodo_)->join();
     
     (app.keyframe_manager_)->stop();
     (app.keyframe_manager_)->join();

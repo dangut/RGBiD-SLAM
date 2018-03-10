@@ -255,6 +255,7 @@ namespace RGBID_SLAM
   double
   computeConvexHullArea(const std::vector<cv::Point2f> &points)
   {
+    std::cout << "ch size: " << points.size() << std::endl;
     std::vector<cv::Point2f> ch;
     cv::convexHull(cv::Mat(points), ch, false);
     //std::cout << "        points size: " << points.size() << std::endl;

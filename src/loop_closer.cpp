@@ -470,17 +470,18 @@ RGBID_SLAM::LoopCloser::computeRANSACTrafo3D( KeyframePtr keyframe_query,
     inlier_candidate_cv_points.push_back(keyframe_candidate->keypoints_[highest_inlier_matches[j].trainIdx].pt);
   }
   
-  double area_ratio_ch_query = computeConvexHullArea(inlier_query_cv_points) / ((double) (keyframe_query->cols_*keyframe_query->rows_));
-  double area_ratio_ch_candidate = computeConvexHullArea(inlier_candidate_cv_points) / ((double) (keyframe_candidate->cols_*keyframe_candidate->rows_));
   
-  std::cout << "Area ratios: " << area_ratio_ch_query << " and " << area_ratio_ch_candidate << std::endl;
   
-  if ((highest_inlier_matches.size() < min_required_inliers_) ||
-      (area_ratio_ch_query < 0.05) || (area_ratio_ch_candidate < 0.05))
+  if ((highest_inlier_matches.size() < min_required_inliers_) )
     return false;
     
   
+  double area_ratio_ch_query = computeConvexHullArea(inlier_query_cv_points) / ((double) (keyframe_query->cols_*keyframe_query->rows_));
+  double area_ratio_ch_candidate = computeConvexHullArea(inlier_candidate_cv_points) / ((double) (keyframe_candidate->cols_*keyframe_candidate->rows_));
+  std::cout << "Area ratios: " << area_ratio_ch_query << " and " << area_ratio_ch_candidate << std::endl;
     
+  if ((area_ratio_ch_query < 0.05) || (area_ratio_ch_candidate < 0.05))
+    return false;
   //if (highest_inlier_matches.size() < RANSAC_inlier_ratio_*raw_matches.size())
     //return false;
   
