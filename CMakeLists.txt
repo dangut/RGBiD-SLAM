@@ -121,7 +121,7 @@ remove_definitions(${_vtk_definitions})
 #  message (${CUDA_NVCC_FLAGS})
 	CUDA_COMPILE(cuda_objs ${cuda})	
 	
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -o3 -g")	
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -o3")	
 	 
 	add_library(RGBID_SLAM ${srcs} ${incs} ${impl_incs} ${cuda} ${cuda_objs})
 #	message(RGBID_SLAM ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${CUDA_LIBRARIES} DBoW2 ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/pcl_gpu_containers/lib/libpcl_gpu_containers.so  ${G2O_LIBS})
