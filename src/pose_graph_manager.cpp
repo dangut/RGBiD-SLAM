@@ -164,8 +164,6 @@ RGBID_SLAM::PoseGraph::buildGraph(const std::vector<Pose> &poses, const std::vec
   rotation_last_b4optim_ = poses.back().rotation_;
   translation_last_b4optim_ = poses.back().translation_;
   idx_last_b4optim_ = poses.size() -1;
-  
-  
 }
 
 void

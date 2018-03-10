@@ -71,7 +71,26 @@ namespace RGBID_SLAM
                        
         void loadCalibration(std::string const &calib_file);    
         
-        void start();
+        void start()
+        {
+          //boost::unique_lock<boost::mutex> lock(created_aux_mutex_);
+          stop_flag_ = false;
+          
+          visodo_thread_.reset(new boost::thread(boost::ref(*this)));
+          
+          //created_cond_.wait (lock);
+        }
+        
+        inline void stop()
+        {
+          stop_flag_ = true;
+        }
+        
+        inline void join()
+        {
+          visodo_thread_->join();
+        }
+      
         
         bool trackNewFrame();        
         
@@ -130,6 +149,7 @@ namespace RGBID_SLAM
         bool real_time_flag_;
         
         bool exit_;
+        bool stop_flag_;
         
         KeyframeManagerPtr keyframe_manager_ptr_;
         
@@ -198,6 +218,8 @@ namespace RGBID_SLAM
         
         inline void initialiseBufferPointers();
         inline void swapBufferPointers();    
+        
+        inline void stopRoutine();
         
         //void downloadAndSaveDepth(const DeviceArray2D<float>& dev_image, int pyrlevel = 0, int iterat = 0);
           
