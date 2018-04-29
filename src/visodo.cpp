@@ -896,6 +896,11 @@ RGBID_SLAM::VisodoTracker::saveIntegrationKeyframesAsOdoKeyframes  (const Intr c
 {
     
   copyImage (depthinv_integrKF_, depthinvs_odoKF_[0]);    
+  
+  //float num_integr_frames = backwards_integrKF_count_ + integrKF_count_;
+  //float filter_th = 0.3f*num_integr_frames;
+      
+  //filterDepthMap(depthinvs_odoKF_[0], weight_integrKF_, filter_th);
     
   for (int i = 1; i < LEVELS; ++i)
   {     
@@ -1689,6 +1694,7 @@ RGBID_SLAM::VisodoTracker::resetIntegrationKeyframe()
 //same routine as resetIntegrationKeyframe but without any cov comp or constraint pushing because this is the last kf to be pushed
 inline void
 RGBID_SLAM::VisodoTracker::stopRoutine(){
+  std::cout << "starting visodo stopping" << std::endl;
   rmatsKF_.push_back(last_integrKF_global_rotation_);
   tvecsKF_.push_back(last_integrKF_global_translation_);
   
@@ -1718,6 +1724,7 @@ RGBID_SLAM::VisodoTracker::stopRoutine(){
   
   keyframe_manager_ptr_->buffer_keyframes_.try_push(keyframe_new_ptr);    
   kf_times_.push_back(1000.f*kf_time_accum_);
+  std::cout << "finished visodo stopping" << std::endl;
 }
 
 inline void
@@ -1806,10 +1813,6 @@ RGBID_SLAM::VisodoTracker::integrateImagesIntoKeyframes (DepthMapf& depthinv_src
     
     createNMapGradients( cam_intrinsics(0), depthinv_integrKF_, xGradsDepthinv_integrKF_, yGradsDepthinv_integrKF_, normals_integrKF_);     
   }
-                                            
-  
-  
-  	
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2244,12 +2247,14 @@ RGBID_SLAM::VisodoTracker::trackNewFrame()
       
       if ( ( integrKF_count_ >= max_integrKF_count_ ) || (visibility_ratio_integr < visibility_ratio_integr_threshold_) )
       {	   
+        //resetOdometryKeyframe();
         resetIntegrationKeyframe();   
       
         computeOverlapping(intr, delta_integr_rotation, delta_integr_translation, 
                    depthinv_integrKF_, depthinvs_curr_[0], overlap_mask_integrKF_);
                    
         saveCurrentImagesAsIntegrationKeyframes (intr, rgb24_); 
+        //saveCurrentImagesAsOdoKeyframes (intr); 
         
         swapBufferPointers();
         push_depthinv_buffer_ptr->clear();

@@ -480,14 +480,16 @@ main (int argc, char* argv[])
       catch (const std::exception& /*e*/) { cout << "Exception" << endl; }
       app.savePosesInFile(poses_logfile,  misc_logfile);
     }
-    
-    
+    std::cout << "sending stop signal to visodo" << std::endl;
     (app.visodo_)->stop();
-    (app.visodo_)->join();
-    
+    std::cout << "sending stop signal to kfmanager" << std::endl;
     (app.keyframe_manager_)->stop();
-    (app.keyframe_manager_)->join();
     
+    std::cout << "waiting visodo" << std::endl;
+    (app.visodo_)->join();
+     std::cout << "waiting kf_manager" << std::endl;
+    (app.keyframe_manager_)->join();
+     std::cout << "visodo and kf manager joined" << std::endl;
     //if ((app.keyframe_manager_)->loop_found_ == true)
     //{
       //(app.keyframe_manager_)->performOptimisation();
